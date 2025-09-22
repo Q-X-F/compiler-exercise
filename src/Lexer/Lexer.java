@@ -15,8 +15,7 @@ public class Lexer {
         // Ignoring whitespace
         while (true) {
             if (this.peek == '\n') line++;
-            else if (this.peek == ' ' || this.peek == '\t') continue;
-            else break;
+            else if (this.peek != ' ' && this.peek != '\t') break;
             this.peek = (char)System.in.read();
         }
 
@@ -65,6 +64,8 @@ public class Lexer {
             this.peek = (char)System.in.read();
             return new Token(Tag.FACT);
         }
+        //
+        if (this.peek == (char)-1) return null;
         throw new IOException("Unexpected " + this.peek + ".");
     }
 
