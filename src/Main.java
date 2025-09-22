@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         Lexer l = new Lexer();
         try {
-            for (int i = 1; i < 100; i++) {
+            while (true) {
                 l.nextToken().printToken();
             }
         } catch (IOException e) {
