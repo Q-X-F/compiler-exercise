@@ -65,7 +65,7 @@ public class Lexer {
             return new Token(Tag.FACT);
         }
         //
-        if (this.peek == (char)-1) return null;
+        if (this.peek == (char)-1) return new Token(Tag.END);
         throw new IOException("Unexpected " + this.peek + ".");
     }
 

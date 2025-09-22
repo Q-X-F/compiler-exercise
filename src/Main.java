@@ -1,6 +1,6 @@
 import Lexer.Lexer;
 import Lexer.Token;
-
+import Lexer.Tag;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ public class Main {
             Token t;
             for ( ; ; ) {
                 t = l.nextToken();
-                if (t == null) return;
+                if (t.tag == Tag.END) return;
                 t.printToken();
             }
         } catch (IOException e) {
