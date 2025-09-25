@@ -42,7 +42,7 @@ public class Parser {
                 if (root.type == 'E' && nodeStack.isEmpty()) return root;
                 else throw new ParsingException("Accept error."); // For example, multiple end markers.
             }
-            System.out.println("step");
+
         }
     }
 
@@ -244,7 +244,7 @@ public class Parser {
         System.out.println("shifted " + state);
     }
 
-    
+
     public void reduce(int rule) {
         Node e, t, b, a, id, add, sub, power, cos, fact;
         switch (rule) {
