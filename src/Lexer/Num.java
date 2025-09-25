@@ -9,6 +9,6 @@ public class Num extends Token {
 
     @Override
     public void printToken() {
-        System.out.println("NUM: " + this.value);
+        System.out.print("NUM(" + this.value + ")");
     }
 }

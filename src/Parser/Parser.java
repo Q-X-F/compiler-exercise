@@ -10,28 +10,38 @@ public class Parser {
     private Stack<Node> nodeStack;
     private Stack<Integer> stateStack;
     private Token nextToken;
+    private boolean accepted;
 
     public Parser() {
         this.nodeStack = new Stack<>();
         this.stateStack = new Stack<>();
         this.stateStack.push(0);
         this.nextToken = null;
+        this.accepted = false;
     }
 
     public Node generateParseTree() throws IOException, ParsingException {
         boolean shifted = true;
+        Lexer l = new Lexer();
         while (true) {
-            Lexer l = new Lexer();
             if (shifted) this.nextToken = l.nextToken();
-            if (
-                stateStack.peek() == 0 && nodeStack.peek().terminal 
-                && nodeStack.peek().token.tag == Tag.END
-            ) {
-                // Accepted!
-                nodeStack.pop();
-                return nodeStack.pop();
-            }
+            
             shifted = action();
+            if (
+                this.accepted
+            ) {
+                // Accepted
+                if (!(
+                    !nodeStack.isEmpty() 
+                    && nodeStack.peek().terminal 
+                    && nodeStack.peek().token.tag == Tag.END
+                )) throw new ParsingException("Accept error.");
+                nodeStack.pop();
+                Node root = nodeStack.pop();
+                if (root.type == 'E' && nodeStack.isEmpty()) return root;
+                else throw new ParsingException("Accept error."); // For example, multiple end markers.
+            }
+            System.out.println("step");
         }
     }
 
@@ -46,12 +56,10 @@ public class Parser {
             case 9:
                 switch (nextToken.tag) {
                     case Tag.NUM:
-                        stateStack.push(6);
-                        nodeStack.push(new Node(nextToken));
+                        shift(6);
                         return true;
                     case Tag.COS:
-                        stateStack.push(4);
-                        nodeStack.push(new Node(nextToken));
+                        shift(4);
                         return true;
                     default:
                         throw new ParsingException("Invalid action.");
@@ -65,8 +73,12 @@ public class Parser {
                         shift(8);
                         return true;
                     case Tag.END:
-                        // TODO: Accept
+                        // Accept
                         nodeStack.push(new Node(nextToken));
+                        this.accepted = true;
+                        // debug
+                        System.out.println("accepted!");
+                        // debug end
                         return true;
                     default:
                         throw new ParsingException("Invalid action.");
@@ -126,7 +138,7 @@ public class Parser {
                     case Tag.SUB:
                     case Tag.POWER:
                     case Tag.END:
-                        reduce(7);
+                        reduce(6);
                         return false;
                     default:
                         throw new ParsingException("Invalid action.");
@@ -178,6 +190,7 @@ public class Parser {
         }
     }
 
+    // Returns state number
     public int goTo() throws ParsingException {
         switch (this.stateStack.peek()) {
             case 0:
@@ -185,6 +198,13 @@ public class Parser {
                     case 'E': return 1;
                     case 'T': return 2;
                     case 'B': return 3;
+                    case 'A': return 5;
+                    default:
+                        throw new ParsingException("GOTO " + this.stateStack.peek() + " " + this.nodeStack.peek().type + " failed.");
+                }
+            case 4:
+                switch (this.nodeStack.peek().type) {
+                    case 'B': return 10;
                     case 'A': return 5;
                     default:
                         throw new ParsingException("GOTO " + this.stateStack.peek() + " " + this.nodeStack.peek().type + " failed.");
@@ -219,11 +239,19 @@ public class Parser {
     }
 
     public void shift(int state) {
+        // debug
+        //System.out.println("shift started");
+        // debug end
         stateStack.push(state);
         nodeStack.push(new Node(nextToken));
+        // debug
+        System.out.println("shifted " + state);
     }
 
     public void reduce(int rule) {
+        // debug
+        //System.out.println("reduce started");
+        // debug end
         Node e, t, b, a, id, add, sub, power, cos, fact;
         switch (rule) {
             case 1:
@@ -308,6 +336,29 @@ public class Parser {
             default:
                 throw new ParsingException("Invalide rule number.");
         }
-        goTo();
+        stateStack.push(goTo());
+        // debug
+        System.out.println("reduced " + rule);
+    }
+
+    public void printParseTree(Node root) {
+        //debug
+        //System.out.println("printing");
+        //debug end
+        if (root == null) throw new RuntimeException("Nothing to print.");
+        if (root.terminal) root.token.printToken();
+        else {
+            System.out.print(root.type + "(");
+            if (root.optChildA != null) printParseTree(root.optChildA);
+            if (root.optChildB != null) {
+                System.out.print(", ");
+                printParseTree(root.optChildB);
+            }
+            if (root.optChildC != null) {
+                System.out.print(", ");
+                printParseTree(root.optChildC);
+            }
+            System.out.print(")");
+        }
     }
 }

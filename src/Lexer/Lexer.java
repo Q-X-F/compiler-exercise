@@ -5,13 +5,23 @@ import java.io.IOException;
 public class Lexer {
     public int line;
     private char peek;
+
+    // Only for disambiguation of +, -, as operators or part of NUM
+    // True if previous token is NUM of FACT
+    private boolean followingNumOrFact;
+
     public Lexer() {
         this.line = 1;
         this.peek = ' ';
+        this.followingNumOrFact = false;
     }
 
     // Returns next Token from input stream
     public Token nextToken() throws IOException {
+        // debug
+        //System.out.println("called nextToken");
+        // debug end
+        
         // Ignoring whitespace
         while (true) {
             if (this.peek == '\n') line++;
@@ -21,26 +31,33 @@ public class Lexer {
 
         // NUM detected
         if (Character.isDigit(this.peek)) {
+            this.followingNumOrFact = true;
             return new Num(scanNum());
         }
         // '+' could be ADD or part of NUM
         if (this.peek == '+') {
             this.peek = (char)System.in.read();
-            if (Character.isDigit(this.peek)) {
+            if (Character.isDigit(this.peek) && !this.followingNumOrFact) {
+                this.followingNumOrFact = true;
                 return new Num(scanNum());
             } else {
+                this.followingNumOrFact = false;
                 return new Token(Tag.ADD);
             }
         }
         // '-' could be SUB or part of NUM
         if (this.peek == '-') {
             this.peek = (char)System.in.read();
-            if (Character.isDigit(this.peek)) {
+            if (Character.isDigit(this.peek) && !this.followingNumOrFact) {
+                this.followingNumOrFact = true;
                 return new Num(-scanNum());
             } else {
+                this.followingNumOrFact = false;
                 return new Token(Tag.SUB);
             }
         }
+        this.followingNumOrFact = false;
+
         // POWER detected
         if (this.peek == '^') {
             this.peek = (char)System.in.read();
@@ -62,6 +79,7 @@ public class Lexer {
         // FACT detected
         if (this.peek == '!') {
             this.peek = (char)System.in.read();
+            this.followingNumOrFact = true;
             return new Token(Tag.FACT);
         }
         //

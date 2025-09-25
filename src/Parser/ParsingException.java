@@ -1,11 +1,10 @@
 package Parser;
 
 public class ParsingException extends RuntimeException {
-    String message;
     public ParsingException() {
-        this.message = "";
+        super();
     }
     public ParsingException(String message) {
-        this.message = message;
+        super(message);
     }
 }
