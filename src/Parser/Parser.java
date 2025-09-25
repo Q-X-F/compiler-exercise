@@ -20,6 +20,7 @@ public class Parser {
         this.accepted = false;
     }
 
+    // Returns the root of the parse tree
     public Node generateParseTree() throws IOException, ParsingException {
         boolean shifted = true;
         Lexer l = new Lexer();
@@ -76,9 +77,7 @@ public class Parser {
                         // Accept
                         nodeStack.push(new Node(nextToken));
                         this.accepted = true;
-                        // debug
                         System.out.println("accepted!");
-                        // debug end
                         return true;
                     default:
                         throw new ParsingException("Invalid action.");
@@ -239,19 +238,14 @@ public class Parser {
     }
 
     public void shift(int state) {
-        // debug
-        //System.out.println("shift started");
-        // debug end
         stateStack.push(state);
         nodeStack.push(new Node(nextToken));
-        // debug
+        // printed step:
         System.out.println("shifted " + state);
     }
 
+    
     public void reduce(int rule) {
-        // debug
-        //System.out.println("reduce started");
-        // debug end
         Node e, t, b, a, id, add, sub, power, cos, fact;
         switch (rule) {
             case 1:
@@ -337,14 +331,11 @@ public class Parser {
                 throw new ParsingException("Invalide rule number.");
         }
         stateStack.push(goTo());
-        // debug
+        // printed step
         System.out.println("reduced " + rule);
     }
 
     public void printParseTree(Node root) {
-        //debug
-        //System.out.println("printing");
-        //debug end
         if (root == null) throw new RuntimeException("Nothing to print.");
         if (root.terminal) root.token.printToken();
         else {
